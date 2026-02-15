@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copywriter Portfolio | Video Projects</title>
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --text-color: #111111;
+            --accent: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 60px 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 80px auto;
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+        }
+
+        /* Responsive Grid */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .video-card {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .thumb-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #eee;
+        }
+
+        .video-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .video-card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Overlay Play Icon */
+        .play-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        /* Lightbox/Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 1100px;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            body { padding: 40px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Advertising Portfolio</h1>
+    <p class="subtitle">A collection of commercial work and creative storytelling.</p>
+</header>
+
+<div class="portfolio-grid" id="grid">
+    </div>
+
+<div id="videoModal" class="modal">
+    <span class="close-btn" onclick="closeVideo()">&times;</span>
+    <div class="modal-content">
+        <iframe id="videoPlayer" width="100%" height="100%" src="" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+</div>
+
+<script>
+    // The list of video IDs from your links
+    const videoIds = [
+        'x6dVSgwVpME', 'CfQfAYZbxBA', '2JXR8seK8Ck', 'o7hvULDVGSE', 'ODb9YF7QqxE', 
+        'tS9aeJtPbio', 'LvsJ-ltPit4', 'RoWXM98qSvA', 'XAKxxUl8C_g', 'EDPHN1kg40Q', 
+        '8iRRR3k3wb0', 'aFjC9lVRbgM', 'OxylOCzwGdQ', 'Qs57eHIYKCI', 'v0POQb9xVxY', 
+        'OGPY0zSHg6g', '4TLakEZEa58', '9uxFwCqSNJw', 'yMxaOm17Sbo', 'QfGRPaFh6fc', 
+        'qDidTkAf_7E', 'hB5ZH_RT6-4', '0r5X6WV95UE', '-SfIBYRMjeI', 'EagOjY0yLec', 
+        '2o88NLpd5Q4', 'UfTcgD_l4Dw', '8gXsUtNQV3k', 'j4kWYpgxKAU', 'SZXq_ton0UI', 
+        'ZjOmbB8XWOM', 'vPHHA4CvDXY', 'iJUIwOcO6ks', 'YfYO-y8aqa4', 'XrVlbM_CtYQ', 
+        'i_qTY7HHEwY', 'vdUzEZnfzO0', '9RVVJ6XULLI', 'nofae2cmP3Q', '9bFOBmHt8ck', 
+        'Xxg_eGE4Qro', 'ztKJfPITc0c', 'G2Ha35KXI5U', 'IfCViwFd02g', 'X-HmuVkHgFE', 
+        'GuChHx5EKpI', '8uS37-oPMPc'
+    ];
+
+    const grid = document.getElementById('grid');
+    const modal = document.getElementById('videoModal');
+    const player = document.getElementById('videoPlayer');
+
+    // Generate the grid items
+    videoIds.forEach(id => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.onclick = () => openVideo(id);
+        card.innerHTML = `
+            <div class="thumb-container">
+                <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" loading="lazy" alt="Video Project">
+                <div class="play-overlay"><span style="color:white; font-size:40px;">▶</span></div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+
+    function openVideo(id) {
+        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Stop background scrolling
+    }
+
+    function closeVideo() {
+        modal.style.display = 'none';
+        player.src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    window.onclick = (e) => { if (e.target == modal) closeVideo(); }
+</script>
+
+</body>
+</html>
